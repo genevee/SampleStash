@@ -5,6 +5,7 @@
  *  Author: Genevieve
  */ 
 
+//Can be found in the AVR/Arduino firmware downloads
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
@@ -15,9 +16,9 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include <compat/twi.h>
-#include "i2c.h"
 
-#include "nmea.h"
+//My own files, must be manually downloaded
+#include "i2c.h"
 
 #ifndef Printing_h
 #define Printing_h
@@ -26,26 +27,27 @@
 
 #define FOSC 1843200// Clock Speed
 
-#define BAUD1 9600
-#define MYUBRR1 ((F_CPU/16)/BAUD1-1)
+#define BAUD1 9600 //Desired USART baud rate
+#define MYUBRR1 ((F_CPU/16)/BAUD1-1) //
 
-#define BAUD2 57600
+#define BAUD2 57600 //Secondary baud RATE
 #define MYUBRR2 ((F_CPU/16)/BAUD2-1)
 
-#define SPI_Serial (DDB0)
-#define SD_Serial (DDB1)
-
-#define ACC_W (0xA6)
+//I2C addresses for sensors
+#define ACC_W (0xA6) //Acceleromter ADXL345
 #define ACC_R (0xA7)
-#define MAG_W (0x3C)
+#define MAG_W (0x3C) //Magnetometer HCM5883L
 #define MAG_R (0x3D)
-#define ALT_W (0xC0)
+#define ALT_W (0xC0) //Altimeter MPL3115A2
 #define ALT_R (0xC1)
-#define GYRO_W (0xD0)//0x68
+#define GYRO_W (0xD0)//0x68 //Gyropscope ITG-3200
 #define GYRO_R (0xD1) //0x69
 
+//Specific, useful addresses to be written at sensor initilizatoin 
 #define ACC_FORMAT (0x31) //Write 0x01 to put in the 4G range
 #define ACC_POWER_CONTROL (0x2D) // Write 0x08 to put in measurement mode
+
+//Addresses of the accelerator measurement registers 
 #define ACC_X1 (0x32)
 #define ACC_X2 (0x33)
 #define ACC_Y1 (0x34)
@@ -53,6 +55,7 @@
 #define ACC_Z1 (0x36)
 #define ACC_Z2 (0x37)
 
+//Addresses of the magnetometer measurement and initilization registers 
 #define MAG_CONFIG1 (0x00)
 #define MAG_CONFIG2 (0x01)
 #define MAG_MODE (0x02)
@@ -81,25 +84,34 @@
 #define ALT_T1 (0x04)
 #define ALT_T2 (0x05)
 
+//Functions to initialize USART1 and 2, and read and write to both
 void USART_Init2( unsigned int ubrr);
 void USART_Init1( unsigned int ubrr);
 unsigned char USART1_Read(void);
 void USART1_Write(unsigned char data);
 
+//Functions to read and write in Master Mode to I2C
 void MASTER_write(int device_w, int reg, int data);
 int MASTER_read(int device_r, int device_w, int reg);
 int BITWISE_rect(int value1, int value2);
 int* MASTER_multiple_read(int* bytes, int device_r, int device_w, int reg_start, int reg_to_read);
 
+//Debugging function, to print an array of 6 values to a serial port
 void BITWISE_print(int* read_ptr);
 
+//Initializes and read from ADC1
 void ADC_init();
 uint8_t ADC_read(int channel);
+
+//Initializes the sets time on Real Time Clock sensor
 int RTC_init();
 int SetTimeDate(int d, int mo, int y, int h, int mi, int s);
 char* ReadTimeDate();
+
+//Blinks on board LED for debugging purposes
 void Blink_LED(void);
 
+//Character array for debugging purpouses
 char stringing[256];
 
 int main(void)
@@ -110,7 +122,7 @@ int main(void)
 	char GPS_read [256];
 	char* GPS_read_ptr = &(GPS_read[0]);
 	
-	/*int mag_read[6];
+	int mag_read[6];
 	int* mag_read_ptr = &(mag_read[0]);
 	
 	int acc_read[6];
@@ -123,49 +135,38 @@ int main(void)
 	int* alt_baro_read_ptr = &(alt_baro_read[0]);	
 	
 	DS3234_DATE read_date;
-	DS3234_TIME read_time;*/
+	DS3234_TIME read_time;
 	
 	char str[255]; //Initialized debug string for UART
 	
 	USART_Init1(MYUBRR2); //Initilize UART periferhal
 	USART_Init2(MYUBRR2); //Initilize UART periferhal
 		
-	
 	debug_statement("Initializing USART and I2C...");
 	
-	//DDRB |= (1 <<5 ); //Set Port D as digital output	
+	DDRB |= (1 <<5 ); //Set Port D as digital output	
 	i2c_init(); //Initialize I2C peripheral
 
 	debug_statement("...done \r\n");
-	
-	//debug_statement("-----------Initiailzing SD card---------\r\n");
-	/*DDRB |= (1 << SD_Serial);
-	
-	if(!SD.begin(SD_Serial))
-		debug_statement("Card failed or not present");
-		
-	else
-		debug_statement("SD Card Initiazlied");*/
 		
 	//debug_statement("-----------Initializing ADC---------\r\n");
-	//ADC_init(); //Initializing ADC on Channel 0
-	//ADC_init(1); //Initializing ADC on Channel 0
+	ADC_init(); //Initializing ADC on Channel 0
+	ADC_init(1); //Initializing ADC on Channel 0
 
-	 
 	//debug_statement("-----------Initiailzing IO---------\r\n");
 	//PORTF Pin 0 analog input
-	//DDRF = 0x00;
-	//DDRA |= (1 << DDA0);
+	DDRF = 0x00;
+	DDRA |= (1 << DDA0);
 		 
 	/*debug_statement("-----------Writing MAG Format---------\r\n");
 	MASTER_write(MAG_W, MAG_MODE, 0x00);
 	
 	debug_statement("-----------Writing GYRO Format---------\r\n");*/
-	//MASTER_write(GYRO_W, GYRO_POWER, 0x00);
+	MASTER_write(GYRO_W, GYRO_POWER, 0x00);
 		
 	//debug_statement("-----------Writing ACC Format---------\r\n");
-	//MASTER_write(ACC_W, ACC_FORMAT, 0x01);
-	//MASTER_write(ACC_W, ACC_POWER_CONTROL, 0x08);
+	MASTER_write(ACC_W, ACC_FORMAT, 0x01);
+	MASTER_write(ACC_W, ACC_POWER_CONTROL, 0x08);
 
 	/*debug_statement("-----------Writing ALT/BARO Format---------\r\n");
 	MASTER_write(ALT_W, ALT_ENABLE, 0xB8);
@@ -173,7 +174,7 @@ int main(void)
 	MASTER_write(ALT_W, ALT_BARO_ENABLE, 0xB9);*/
 
 	//debug_statement("-----------Initiazling RTC---------\r\n");
-	/*SPI_init();
+	SPI_init();
 	
 	read_time.seconds = 15;
 	read_time.minutes = 13;
@@ -181,10 +182,7 @@ int main(void)
 	read_time.ampm_mask = 0;
 	SPI_write_time(&read_time);
 	
-	
-	*/
 	debug_statement("Blinking");
-	
 	Blink_LED();
 	
 	debug_statement("Entering Loop");
