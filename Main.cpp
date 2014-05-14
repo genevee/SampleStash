@@ -195,26 +195,26 @@ int main(void)
 		//debug_statement("-----------Entering reading loop---------\r\n");
 		
 		//debug_statement("-----------Reading RTC---------\r\n");	
-		/*SPI_read_time(&read_time);
+		SPI_read_time(&read_time);
 		uint8_t seconds = read_time.seconds;
 		uint8_t minutes = read_time.minutes;
 		uint8_t hours = read_time.hours;
 		uint8_t am_pm = read_time.ampm_mask;
 		sprintf(str, "     %d : %d : %d in the ( %d) AM/PM" , hours, minutes, seconds, am_pm);
 		debug_statement(str);
-		debug_statement("\r\n");*/
+		debug_statement("\r\n");
 				
 		
 		
-		/*
-		//debug_statement("-----------Reading MAG---------\r\n");		
-		mag_read_ptr = MASTER_multiple_read(mag_read, MAG_R, MAG_W, MAG_X1, 6);*/
 		
+		//debug_statement("-----------Reading MAG---------\r\n");		
+		mag_read_ptr = MASTER_multiple_read(mag_read, MAG_R, MAG_W, MAG_X1, 6);
+	
 		//debug_statement("-----------Reading ACC---------\r\n");
-		//acc_read_ptr = MASTER_multiple_read(acc_read, ACC_R, ACC_W, ACC_X1, 6);
+		acc_read_ptr = MASTER_multiple_read(acc_read, ACC_R, ACC_W, ACC_X1, 6);
 		
 		//debug_statement("-----------Reading GYRO-----------");	
-		/*gyro_read_ptr = MASTER_multiple_read(gyro_read, GYRO_R, GYRO_W, GYRO_X1, 6);
+		gyro_read_ptr = MASTER_multiple_read(gyro_read, GYRO_R, GYRO_W, GYRO_X1, 6);
 	
 		//debug_statement("-----------Reading ALT-----------");			
 		int alt_status_read = MASTER_read(ALT_R, ALT_W, ALT_STATUS);
@@ -223,25 +223,25 @@ int main(void)
 			alt_status_read = MASTER_read(ALT_R, ALT_W, ALT_STATUS);
 			
 		alt_baro_read_ptr = MASTER_multiple_read(alt_baro_read, ALT_R, ALT_W, ALT_P1, 5);
-			*/
+			
 			
 		//debug_statement("-----------Reading AMBIENT LIGHT-----------");	
-		//uint8_t ambient_light = ADC_read(0);
-		//uint8_t ambient_light = 0;
+		uint8_t ambient_light = ADC_read(0);
+		uint8_t ambient_light = 0;
 		
 		
 		//debug_statement("-----------Reading MICROPHONE LEVEL-----------");
-		//uint8_t sound_level = ADC_read(1);
-		//uint8_t sound_level = 0;
+		uint8_t sound_level = ADC_read(1);
+		uint8_t sound_level = 0;
 		
 		//Printing Values
 		debug_statement("MAG: ");
-		BITWISE_print(mag_read_ptr);*/
+		BITWISE_print(mag_read_ptr);
 		
 		//debug_statement("ACC: ");
-		//BITWISE_print(acc_read_ptr);
+		BITWISE_print(acc_read_ptr);
 		
-		/*debug_statement("GYRO: ");
+		//debug_statement("GYRO: ");
 		BITWISE_print(gyro_read_ptr);	
 		
 		debug_statement("ALT: ");
@@ -253,8 +253,8 @@ int main(void)
 		sprintf(str, "TEMP : %d ", TEMP);
 		debug_statement(str);
 		
-	//	sprintf(str, "AMB LT : %d ", ambient_light);
-	//	debug_statement(str);
+		sprintf(str, "AMB LT : %d ", ambient_light);
+		debug_statement(str);
 	
 		//if (ambient_light < 75)
 			//PORTB = (0 << 5);
