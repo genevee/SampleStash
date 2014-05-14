@@ -19,6 +19,7 @@
 
 //My own files, must be manually downloaded
 #include "i2c.h"
+#include SPI_custom.h
 
 #ifndef Printing_h
 #define Printing_h
